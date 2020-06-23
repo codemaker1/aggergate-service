@@ -3,15 +3,10 @@ package com.micro.aggregator.controller;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +30,12 @@ public class AggregatorController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@Autowired
+	private UserServiceProxy userProxy;
+	
+	@Autowired
+	private OrdersServieProxy ordersProxy;
+	
 	@GetMapping("/check")
 	public String check()
 	{
@@ -47,17 +48,20 @@ public class AggregatorController {
 	{
 	  UserOrders userOrders = new UserOrders();
 	  
-	 String url = "http://user-service/user/"+id;
+	 //String url = 
 	  
 	//  User user = restTemplate.getForObject(url, User.class);
-	  ResponseEntity<User> response = restTemplate.exchange(url, HttpMethod.GET, null, User.class);
-	  User user = response.getBody();
+	 // ResponseEntity<User> response = restTemplate.exchange(url+"/user"+id, HttpMethod.GET, null, User.class);
+	//  User user = response.getBody();
 	 // User user = restTemplate.getForObject(url, User.class);
 	 //User user = restTemplate.getForObject("http://localhost:8080/user/"+id, User.class);
-	  Orders[] orders =  restTemplate.getForObject("http://orders-service/orders/"+id, Orders[].class);
-	  List<Orders> ordersList=Arrays.asList(orders);
+	 User user =  userProxy.retrieveUserValue(id);
+	  
+	  //Orders[] orders =  restTemplate.getForObject("http://orders-service/orders/"+id, Orders[].class);
+	 List<Orders> orders = ordersProxy.retrieveOrdersValue(id);
+	 // List<Orders> ordersList=Arrays.asList(orders);
 	  userOrders.setUserDetails(user);
-	 userOrders.setOrders(ordersList);
+	 userOrders.setOrders(orders);
 	  return userOrders;
 		
 	}
